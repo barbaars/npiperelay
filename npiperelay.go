@@ -9,8 +9,10 @@ import (
 	"io"
 	"log"
 	"os"
+	"path/filepath"
 	"runtime"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 
@@ -66,6 +68,35 @@ func dialPipe(p string, poll bool, limit bool) (*overlappedFile, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	if strings.Contains(p, "*") {
+		for {
+			fd := windows.Win32finddata{}
+			h, err := windows.FindFirstFile(&p16[0], &fd)
+			if err == nil {
+				windows.FindClose(h)
+				filename := filepath.Dir(p) + windows.UTF16ToString(fd.FileName[:])
+
+				p16, err = windows.UTF16FromString(filename)
+				if err != nil {
+					return nil, err
+				}
+				break
+			}
+
+			if poll && err == windows.ERROR_NO_MORE_FILES {
+				time.Sleep(200 * time.Millisecond)
+				continue
+			}
+			return nil, &os.PathError{Path: p, Op: "find", Err: err}
+		}
+	}
+
+	if *verbose {
+		pipe := windows.UTF16ToString(p16[:])
+		log.Println("Found", pipe)
+	}
+
 	for attempts := 0; ; {
 		h, err := windows.CreateFile(&p16[0], windows.GENERIC_READ|windows.GENERIC_WRITE, 0, nil, windows.OPEN_EXISTING, windows.FILE_FLAG_OVERLAPPED|cSECURITY_SQOS_PRESENT|cSECURITY_ANONYMOUS, 0)
 		if err == nil {

@@ -1,4 +1,4 @@
-module github.com/albertony/npiperelay
+module github.com/barbaars/npiperelay
 
 go 1.23
 

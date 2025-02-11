@@ -1,0 +1,27 @@
+#!/bin/sh
+
+mkdir -p $HOME/.config/systemd/user
+
+cat <<EOF > $HOME/.config/systemd/user/pageant.service 
+[Unit]
+Description=Opens a pipe bridge to a windows named pipe of pageant
+
+[Service]
+ExecStart=socat UNIX-LISTEN:$HOME/.ssh/pageant.sock,fork,umask=007 EXEC:"npiperelay.exe -ep -s -p //./pipe/pageant.*",nofork
+Restart=always
+RestartSec=30
+ExecStopPost=rm -f $HOME/.ssh/pageant.sock
+
+[Install]
+WantedBy=default.target
+EOF
+
+systemctl --user daemon-reload 
+systemctl --user enable pageant.service
+systemctl --user start pageant.service
+
+LINE_TO_ADD="export SSH_AUTH_SOCK=$HOME/pageant.sock"
+grep -qxF "$LINE_TO_ADD" $HOME/.bashrc || echo "$LINE_TO_ADD" >> $HOME/.bashrc
+
+
+
