@@ -7,7 +7,7 @@ cat <<EOF > $HOME/.config/systemd/user/pageant.service
 Description=Opens a pipe bridge to a windows named pipe of pageant
 
 [Service]
-ExecStart=socat UNIX-LISTEN:$HOME/.ssh/pageant.sock,fork,umask=007 EXEC:"npiperelay.exe -ep -s -p //./pipe/pageant.*",nofork
+ExecStart=socat UNIX-LISTEN:$HOME/.ssh/pageant.sock,fork,umask=007 EXEC:"npiperelay.exe -ei -s -p //./pipe/pageant.*",nofork
 Restart=always
 RestartSec=30
 ExecStopPost=rm -f $HOME/.ssh/pageant.sock

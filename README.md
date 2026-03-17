@@ -1,5 +1,8 @@
 # npiperelay
 
+*Note: Fork of [albertony/npiperelay](https://github.com/albertony/npiperelay).
+Added wildcard support in pipe name. Use case: Windows application [Pageant](https://www.chiark.greenend.org.uk/~sgtatham/putty/) creates a windows named pipe with some unique id. Setup of bridging this pipe to WSL is less complex if the we can use a wildcard in the pipename of npiperelay.*
+
 *Note: This is a fork of [jstarks/npiperelay](https://github.com/jstarks/npiperelay).
 The branch named master is kept "frozen" in sync with upstream, while the branch
 named fork is this project's default branch. The fork branch includes additional
