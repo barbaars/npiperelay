@@ -36,7 +36,7 @@ jobs:
       # Checkout the source code.
       - id: git-checkout
         name: Checkout source
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0 # Fetch all history, required for the GoReleaser changelog to work correctly.
           show-progress: false
@@ -44,9 +44,9 @@ jobs:
       # Install go on the runner.
       - id: go-setup
         name: Setup Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v6
         with:
-          go-version-file: go.mod
+          go-version: '1.26' # Quoted, because "go-version: 1.20" would be treated as go version 1.2.
           check-latest: true # Don't use a locally cached version of Go without first checking if it is up-to-date.
 
       # Initialize CodeQL (GitHub vulnerability analysis).
@@ -56,7 +56,7 @@ jobs:
       - id: codeql-init
         name: Setup CodeQL
         if: ${{ github.actor != 'dependabot[bot]' }}
-        uses: github/codeql-action/init@v3
+        uses: github/codeql-action/init@v4
         with:
           languages: go
 
@@ -76,7 +76,7 @@ jobs:
       - id: codeql-analyze
         name: Run CodeQL
         if: ${{ github.actor != 'dependabot[bot]' }}
-        uses: github/codeql-action/analyze@v3
+        uses: github/codeql-action/analyze@v4
 
       # Run govulncheck (Go vulnerability analysis).
       # Currently manual install and execution, not using separate action.
@@ -91,7 +91,7 @@ jobs:
       # Run linting on the source code.
       - id: go-lint
         name: Run linting
-        uses: golangci/golangci-lint-action@v6
+        uses: golangci/golangci-lint-action@v9
         with:
           version: latest
 
@@ -110,7 +110,7 @@ jobs:
       # and one must consider using the snapshot mode instead (see below).
       - id: go-release-tag
         name: Run go release tag (if pushing v-tag or triggered manually)
-        uses: goreleaser/goreleaser-action@v6
+        uses: goreleaser/goreleaser-action@v7
         if: (inputs.release && !inputs.snapshot) || (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v'))
         with:
           version: latest
@@ -122,7 +122,7 @@ jobs:
       # If manual run with options "release" and "snapshot": Build latest commit without publishing a release.
       - id: go-release-snapshot
         name: Run go release snapshot (if triggered manually)
-        uses: goreleaser/goreleaser-action@v6
+        uses: goreleaser/goreleaser-action@v7
         if: inputs.release && inputs.snapshot
         with:
           version: latest
